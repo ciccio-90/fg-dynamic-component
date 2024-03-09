@@ -3,5 +3,28 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
+    "fg-dynamic-component": {
+      "projectType": "library",
+      "root": "projects/fg-dynamic-component",
+      "sourceRoot": "projects/fg-dynamic-component/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/fg-dynamic-component/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/fg-dynamic-component/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/fg-dynamic-component/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    }
   }
 }
