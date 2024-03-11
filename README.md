@@ -207,16 +207,16 @@ class MyComponent {
 You can declaratively set attributes to activate model binding with your ControlValueAccessor components.
 
 > **Attributes**:
-
--   name: used to attach the new control to the input form group (must match the view model property).
--   disabled: specifies that an input field should be disabled.
--   maxlength: specifies the maximum number of characters allowed in an input field.
--   minlength: specifies the minimum number of characters allowed in an input field.
--   min: specifies the minimum value for an input field.
--   max: specifies the maximum value for an input field.
--   pattern: specifies a regular expression that the input field's value is checked against.
--   required: specifies that an input field must be filled.
--   email: defines a field automatically validated to ensure it is a properly formatted e-mail address.
+>
+>-   name: used to attach the new control to the input form group (must match the view model property).
+>-   disabled: specifies that an input field should be disabled.
+>-   maxlength: specifies the maximum number of characters allowed in an input field.
+>-   minlength: specifies the minimum number of characters allowed in an input field.
+>-   min: specifies the minimum value for an input field.
+>-   max: specifies the maximum value for an input field.
+>-   pattern: specifies a regular expression that the input field's value is checked against.
+>-   required: specifies that an input field must be filled.
+>-   email: defines a field automatically validated to ensure it is a properly formatted e-mail address.
 
 ```ts
 @Component({
