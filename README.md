@@ -19,7 +19,7 @@ $ npm install fg-dynamic-component --save
 
 ## Usage
 
-### DynamicComponent
+### FGDynamicComponent
 
 Import `FGDynamicComponent` where you need to render dynamic components:
 
@@ -38,8 +38,11 @@ and bind from your component class type of component to render:
 ```ts
 import { FGDynamicService, FGDynamicItem } from "fg-dynamic-component";
 
-FGDynamicService.registerComponent('MyDynamicComponent1', MyDynamicComponent1);
-FGDynamicService.registerComponent('MyDynamicComponent4', import('...').then(m => m.MyDynamicComponent4));
+FGDynamicService.registerComponent("MyDynamicComponent1", MyDynamicComponent1);
+FGDynamicService.registerComponent(
+    "MyDynamicComponent4",
+    import("...").then((m) => m.MyDynamicComponent4)
+);
 
 @Component({
     selector: "my-component",
@@ -50,15 +53,16 @@ class MyComponent {
         type: "MyDynamicComponent1",
         items: [
             {
-                type: MyDynamicComponent2
+                type: MyDynamicComponent2,
             },
             {
-                type: import('...').then(m => m.MyDynamicComponent3)
+                type: import("...").then((m) => m.MyDynamicComponent3),
             },
             {
-                type: 'MyDynamicComponent4'
-            }
-        ]} as FGDynamicItem);
+                type: "MyDynamicComponent4",
+            },
+        ],
+    } as FGDynamicItem);
 }
 ```
 
@@ -67,32 +71,35 @@ class MyComponent {
 You may use `<fg-dynamic>` as a standalone component:
 
 ```ts
-import { FGDynamicComponent, FGDynamicService, FGDynamicItem } from 'fg-dynamic-component';
+import { FGDynamicComponent, FGDynamicService, FGDynamicItem } from "fg-dynamic-component";
 
-FGDynamicService.registerComponent('MyDynamicComponent1', MyDynamicComponent1);
-FGDynamicService.registerComponent('MyDynamicComponent4', import('...').then(m => m.MyDynamicComponent4));
+FGDynamicService.registerComponent("MyDynamicComponent1", MyDynamicComponent1);
+FGDynamicService.registerComponent(
+    "MyDynamicComponent4",
+    import("...").then((m) => m.MyDynamicComponent4)
+);
 
 @Component({
-  selector: 'my-component',
-  template: `<fg-dynamic [configuration]="configuration()" />`
-  imports: [FGDynamicComponent],
-  standalone: true,
+    selector: "my-component",
+    template: `<fg-dynamic [configuration]="configuration()" />`,
+    imports: [FGDynamicComponent],
+    standalone: true,
 })
 class MyComponent {
-  configuration = signal({
-    type: 'MyDynamicComponent1',
-    items: [
-        {
-            type: MyDynamicComponent2
-        },
-        {
-            type: import('...').then(m => m.MyDynamicComponent3)
-        },
-        {
-            type: 'MyDynamicComponent4'
-        }
-    ]
-  } as FGDynamicItem);
+    configuration = signal({
+        type: "MyDynamicComponent1",
+        items: [
+            {
+                type: MyDynamicComponent2,
+            },
+            {
+                type: import("...").then((m) => m.MyDynamicComponent3),
+            },
+            {
+                type: "MyDynamicComponent4",
+            },
+        ],
+    } as FGDynamicItem);
 }
 ```
 
@@ -104,35 +111,35 @@ You can pass `inputs` and `outputs` to your dynamic components:
 
 ```ts
 @Component({
-  selector: 'my-component',
-  template: `<fg-dynamic [configuration]="configuration()" />`
-  imports: [FGDynamicComponent],
-  standalone: true,
+    selector: "my-component",
+    template: `<fg-dynamic [configuration]="configuration()" />`,
+    imports: [FGDynamicComponent],
+    standalone: true,
 })
 class MyComponent {
-  configuration = signal({
-    type: MyDynamicComponent1,
-    inputs: {
-        hello: 'world',
-        something: () => 'can be really complex'
-    },
-    outputs: {
-        onSomething: (type) => alert(type)
-    }
-  } as FGDynamicItem);
+    configuration = signal({
+        type: MyDynamicComponent1,
+        inputs: {
+            hello: "world",
+            something: () => "can be really complex",
+        },
+        outputs: {
+            onSomething: (type) => alert(type),
+        },
+    } as FGDynamicItem);
 }
 
 @Component({
-  selector: 'my-dynamic-component1',
-  template: 'Dynamic Component 1',
+    selector: "my-dynamic-component1",
+    template: "Dynamic Component 1",
 })
 class MyDynamicComponent1 {
-  @Input()
-  hello: string;
-  @Input()
-  something: Function;
-  @Output()
-  onSomething = new EventEmitter<string>();
+    @Input()
+    hello: string;
+    @Input()
+    something: Function;
+    @Output()
+    onSomething = new EventEmitter<string>();
 }
 ```
 
@@ -142,9 +149,9 @@ You can update your inputs passing expressions binding using a view model and th
 ```ts
 @Component({
   selector: 'my-component',
-  template: `<fg-dynamic [configuration]="configuration()" [(viewModel)]="viewModel" />`
+  template: `<fg-dynamic [configuration]="configuration()" [(viewModel)]="viewModel" />`.
   imports: [FGDynamicComponent],
-  standalone: true,
+  standalone: true
 })
 class MyComponent {
   configuration = signal({
@@ -161,7 +168,7 @@ class MyComponent {
 
 @Component({
   selector: 'my-dynamic-component1',
-  template: 'Dynamic Component 1',
+  template: 'Dynamic Component 1'
 })
 class MyDynamicComponent1 {
   @Input()
@@ -177,22 +184,21 @@ class MyDynamicComponent1 {
 
 You can declaratively set attributes, as you would inputs.
 
-
 ```ts
 @Component({
-  selector: 'my-component',
-  template: `<fg-dynamic [configuration]="configuration()" [(viewModel)]="viewModel" />`
+    selector: "my-component",
+    template: `<fg-dynamic [configuration]="configuration()" [(viewModel)]="viewModel" />`,
 })
 class MyComponent {
-  configuration = signal({
-    type: MyDynamicComponent1,
-    attributes: {
-        "my-attribute": "attribute-value",
-        class: "some classes",
-        disabled: '$vm().isDisabled'
-    }
-  } as FGDynamicItem);
-  viewModel = model({ isDisabled: true });
+    configuration = signal({
+        type: MyDynamicComponent1,
+        attributes: {
+            "my-attribute": "attribute-value",
+            class: "some classes",
+            disabled: "$vm().isDisabled",
+        },
+    } as FGDynamicItem);
+    viewModel = model({ isDisabled: true });
 }
 ```
 
@@ -201,33 +207,35 @@ class MyComponent {
 You can declaratively set attributes to activate model binding with your ControlValueAccessor components.
 
 > **Attributes**:
-> name: used to dinamically attach a form control to the input form group (should match the view model property).
-> disabled: specifies that an input field should be disabled.
-> maxlength: specifies the maximum number of characters allowed in an input field.
-> minlength: specifies the minimum number of characters allowed in an input field.
-> min: specifies the minimum value for an input field.
-> max: specifies the maximum value for an input field.
-> pattern: specifies a regular expression that the input field's value is checked against.
-> required: specifies that an input field must be filled.
-> email: defines a field automatically validated to ensure it is a properly formatted e-mail address.
+
+-   name: used to dinamically attach a form control to the input form group (should match the view model property).
+-   disabled: specifies that an input field should be disabled.
+-   maxlength: specifies the maximum number of characters allowed in an input field.
+-   minlength: specifies the minimum number of characters allowed in an input field.
+-   min: specifies the minimum value for an input field.
+-   max: specifies the maximum value for an input field.
+-   pattern: specifies a regular expression that the input field's value is checked against.
+-   required: specifies that an input field must be filled.
+-   email: defines a field automatically validated to ensure it is a properly formatted e-mail address.
 
 ```ts
 @Component({
-  selector: 'my-component',
-  template: `<fg-dynamic [configuration]="configuration()" [(viewModel)]="viewModel" [formGroup]="formGroup()" />`
+    selector: "my-component",
+    template: `<fg-dynamic [configuration]="configuration()" [(viewModel)]="viewModel" [formGroup]="formGroup()" />`,
 })
 class MyComponent {
-  configuration = signal({
-    type: MyDynamicComponent1,
-    attributes: {
-        name: 'data.firstName',
-        disabled: '$vm().metadata.firstName.disabled',
-        maxlength: 20,
-        required: true
-    }
-  } as FGDynamicItem);
-  viewModel = model({ data: { firstName: 'Jhon' }, metadata: { firstName: { disabled: false } } });
-  formGroup = signal(new FormGroup({}));
+    configuration = signal({
+        type: MyDynamicComponent1,
+        attributes: {
+            name: "data.firstName",
+            disabled: "$vm().metadata.firstName.disabled",
+            maxlength: 20,
+            required: true,
+        },
+    } as FGDynamicItem);
+    viewModel = model({ data: { firstName: "Jhon" }, metadata: { firstName: { disabled: false } } });
+    formGroup = signal(new FormGroup({}));
+}
 ```
 
 ## Contributing
