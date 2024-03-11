@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, ComponentRef, ElementRef, EventEmitter, InputSignal, ModelSignal, OnDestroy, Renderer2, Signal, Type, ViewContainerRef, inject, input, model, viewChild, viewChildren } from '@angular/core';
-import { AsyncValidator, AsyncValidatorFn, ControlValueAccessor, FormControl, FormControlDirective, FormGroup, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, Validator, ValidatorFn, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, ComponentRef, ElementRef, EventEmitter, Injector, InputSignal, ModelSignal, OnDestroy, Renderer2, Signal, Type, ViewContainerRef, inject, input, model, viewChild, viewChildren } from '@angular/core';
+import { ControlValueAccessor, FormControl, FormControlDirective, FormGroup, NG_VALUE_ACCESSOR, NgControl, ValidatorFn, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 export interface FGDynamicItem {
@@ -7,29 +7,19 @@ export interface FGDynamicItem {
     inputs?: Record<string, string | unknown>;
     outputs?: Record<string, string | Function>;
     attributes?: Record<string, string | unknown>;
-    hidden?: string | boolean;
-    disabled?: string | boolean;
-    modelProperty?: string;
-    min?: string | number;
-    max?: string | number;
-    required?: string | boolean;
-    email?: string | boolean;
-    minLength?: string | number;
-    maxLength?: string | number;
-    pattern?: string | RegExp
     items?: FGDynamicItem[];
 }
 
 export class FGDynamicService {
-    private static _components: Record<string, Type<unknown>> = {};
+    private static _components: Record<string, Type<unknown> | Promise<Type<unknown>>> = {};
 
-    static registerComponent(name: string, type: Type<unknown>): void {
+    static registerComponent(name: string, type: Type<unknown> | Promise<Type<unknown>>): void {
         if (name && type) {
             FGDynamicService._components[name] = type;
         }
     }
 
-    static getComponentByName(name: string): Type<unknown> {
+    static getComponent(name: string): Type<unknown> | Promise<Type<unknown>> {
         return FGDynamicService._components[name];
     }
 }
@@ -64,13 +54,13 @@ export class FGDynamicComponent implements OnDestroy {
     private _formControlDirective: FormControlDirective;
     private _formGroupSubscription: Subscription;
     private _component: Type<unknown>;
+    private _injector: Injector = inject(Injector);
 
     async ngOnChanges(): Promise<void> {
         await this.loadComponentAsync();
         this.createComponent();
         this.setInputs();
         this.setAttributes();
-        this.setVisibility();
         this.setFormControlStatus();
         this.setFormControlValidators();
     }
@@ -78,7 +68,7 @@ export class FGDynamicComponent implements OnDestroy {
     private async loadComponentAsync(): Promise<void> {
         if (this.configuration().type != null && !this._component) {
             if (typeof(this.configuration().type) === 'string') {
-                this._component = FGDynamicService.getComponentByName(this.configuration().type as string);
+                this._component = await FGDynamicService.getComponent(this.configuration().type as string);
             } else {
                 this._component = await (this.configuration().type as (Type<unknown> | Promise<Type<unknown>>));
             }
@@ -87,8 +77,23 @@ export class FGDynamicComponent implements OnDestroy {
 
     private createComponent(): void {
         if (this._component && !this._componentRef && this._viewContainerRef()) {
+            let injector: Injector;
+
+            if (this.formGroup() && this.configuration()?.attributes && this.configuration()?.attributes['name'] && this.viewModel()) {
+                this._formControlDirective = new FormControlDirective(null, null, null, null);
+
+                injector = Injector.create({
+                    providers: [{
+                        provide: NgControl,
+                        useValue: this._formControlDirective
+                    }],
+                    parent: this._injector
+                });
+            }
+
             this._componentRef = this._viewContainerRef().createComponent(this._component, {
-                projectableNodes: this._dynamicItems()?.length > 0 ? [this._dynamicItems().map((e: ElementRef<unknown>): Node => e.nativeElement as Node)] : undefined
+                projectableNodes: this._dynamicItems()?.length > 0 ? [this._dynamicItems().map((e: ElementRef<unknown>): Node => e.nativeElement as Node)] : undefined,
+                injector: injector
             });
 
             if (this._componentRef?.changeDetectorRef) {
@@ -135,20 +140,20 @@ export class FGDynamicComponent implements OnDestroy {
     }
 
     private createFormControl(): void {
-        if (this.formGroup() && this.configuration()?.modelProperty && this.viewModel()) {
-            this._formControl = new FormControl(this.getModelPropertyValue(this.viewModel(), this.configuration().modelProperty, null));
+        if (this.formGroup() && this.configuration()?.attributes && this.configuration()?.attributes['name'] && this.viewModel()) {
+            this._formControl = new FormControl(this.getModelPropertyValue(this.viewModel(), this.configuration().attributes['name'] as string, null));
 
-            this.formGroup().addControl(this.configuration().modelProperty, this._formControl);
+            this.formGroup().addControl(this.configuration().attributes['name'] as string, this._formControl);
             this._formGroupSubscription?.unsubscribe();
 
             this._formGroupSubscription = this.formGroup().valueChanges.subscribe((): void => {
                 const model: unknown = this.formGroup().getRawValue();
 
                 if (model) {
-                    const value: unknown = this.getModelPropertyValue(model, this.configuration().modelProperty, null);
+                    const value: unknown = model[this.configuration().attributes['name'] as string] ?? null;
                     const viewModel: unknown = structuredClone(this.viewModel());
 
-                    this.setModelPropertyValue(viewModel, this.configuration().modelProperty, value);
+                    this.setModelPropertyValue(viewModel, this.configuration().attributes['name'] as string, value);
                     this.viewModel.set(viewModel);
                 }
             });
@@ -158,8 +163,8 @@ export class FGDynamicComponent implements OnDestroy {
     }
 
     private setFormControlStatus(): void {
-        if (this._formControl && this.configuration()?.disabled != null) {
-            const isDisabled: boolean = this.evaluateExpression(this.configuration().disabled, this.viewModel) as boolean;
+        if (this._formControl && this.configuration().attributes && this.configuration().attributes['disabled'] != null) {
+            const isDisabled: boolean = this.evaluateExpression(this.configuration().attributes['disabled'], this.viewModel) as boolean;
 
             if (isDisabled) {
                 this._formControl.disable({
@@ -176,47 +181,47 @@ export class FGDynamicComponent implements OnDestroy {
     }
 
     private setFormControlValidators(): void {
-        if (this._formControl && this.configuration()) {
+        if (this._formControl && this.configuration()?.attributes) {
             this._formControl.clearValidators();
 
             const validators: ValidatorFn[] = [];
-            const min = this.evaluateExpression(this.configuration().min, this.viewModel) as number;
+            const min = this.evaluateExpression(this.configuration().attributes['min'], this.viewModel) as number;
 
             if (typeof(min) === 'number') {
                 validators.push(Validators.min(min));
             }
 
-            const max = this.evaluateExpression(this.configuration().max, this.viewModel) as number;
+            const max = this.evaluateExpression(this.configuration().attributes['max'], this.viewModel) as number;
 
             if (typeof(max) === 'number') {
                 validators.push(Validators.max(max));
             }
 
-            const required = this.evaluateExpression(this.configuration().required, this.viewModel) as boolean;
+            const required = this.evaluateExpression(this.configuration().attributes['required'], this.viewModel) as boolean;
 
             if (required === true) {
                 validators.push(Validators.required);
             }
 
-            const email = this.evaluateExpression(this.configuration().email, this.viewModel) as boolean;
+            const email = this.evaluateExpression(this.configuration().attributes['email'], this.viewModel) as boolean;
 
             if (email === true) {
                 validators.push(Validators.email);
             }
 
-            const maxLength = this.evaluateExpression(this.configuration().maxLength, this.viewModel) as number;
+            const maxLength = this.evaluateExpression(this.configuration().attributes['maxlength'], this.viewModel) as number;
 
             if (maxLength > 0) {
                 validators.push(Validators.maxLength(maxLength));
             }
 
-            const minLength = this.evaluateExpression(this.configuration().minLength, this.viewModel) as number;
+            const minLength = this.evaluateExpression(this.configuration().attributes['minlength'], this.viewModel) as number;
 
             if (minLength > 0) {
                 validators.push(Validators.minLength(minLength));
             }
 
-            const pattern = this.evaluateExpression(this.configuration().minLength, this.viewModel) as (string | RegExp);
+            const pattern = this.evaluateExpression(this.configuration().attributes['pattern'], this.viewModel) as (string | RegExp);
 
             if (typeof(pattern) === 'string' || pattern instanceof RegExp) {
                 validators.push(Validators.pattern(pattern));
@@ -231,13 +236,10 @@ export class FGDynamicComponent implements OnDestroy {
     }
 
     private attachFormControlDirective(): void {
-        if (!this._formControlDirective && this._componentRef?.injector) {
-            const validators: (Validator | ValidatorFn)[] = this._componentRef.injector.get<(Validator | ValidatorFn)[]>(NG_VALIDATORS, null);
-            const asyncValidators: (AsyncValidator | AsyncValidatorFn)[] = this._componentRef.injector.get<(AsyncValidator | AsyncValidatorFn)[]>(NG_ASYNC_VALIDATORS, null);
-            const valueAccessors: ControlValueAccessor[] = this._componentRef.injector.get<ControlValueAccessor[]>(NG_VALUE_ACCESSOR, null);
+        if (this._formControlDirective && this._componentRef?.injector && this._formControl) {
+            const valueAccessor: ControlValueAccessor = this._componentRef.injector.get<ControlValueAccessor[]>(NG_VALUE_ACCESSOR, null)?.find((_: ControlValueAccessor): true => true);
 
-            this._formControlDirective = new FormControlDirective(validators, asyncValidators, valueAccessors, null);
-
+            this._formControlDirective.valueAccessor = valueAccessor;
             this._formControlDirective.form = this._formControl;
 
             this._formControlDirective.ngOnChanges({
@@ -294,18 +296,6 @@ export class FGDynamicComponent implements OnDestroy {
         if (this.configuration()?.attributes && this._componentRef) {
             for (const attributeName in this.configuration().attributes) {
                 this._renderer.setAttribute(this._componentRef.location.nativeElement, attributeName, this.evaluateExpression(this.configuration().attributes[attributeName], this.viewModel) as string);
-            }
-        }
-    }
-
-    private setVisibility(): void {
-        if (this.configuration()?.hidden != null && this._componentRef) {
-            const hidden: boolean = this.evaluateExpression(this.configuration().hidden, this.viewModel) as boolean;
-
-            if (hidden) {
-                this._renderer.setStyle(this._componentRef.location.nativeElement, 'display', 'none');
-            } else {
-                this._renderer.removeStyle(this._componentRef.location.nativeElement, 'display');
             }
         }
     }
