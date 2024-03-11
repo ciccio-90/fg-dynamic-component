@@ -208,7 +208,7 @@ You can declaratively set attributes to activate model binding with your Control
 
 > **Attributes**:
 
--   name: used to dinamically attach a form control to the input form group (should match the view model property).
+-   name: used to attach the new form control to the input form group (must match the view model property).
 -   disabled: specifies that an input field should be disabled.
 -   maxlength: specifies the maximum number of characters allowed in an input field.
 -   minlength: specifies the minimum number of characters allowed in an input field.
