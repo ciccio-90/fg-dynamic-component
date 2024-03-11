@@ -1,6 +1,22 @@
 {
   "name": "fg-dynamic-component",
   "version": "1.0.0",
+  "author": "Francesco Guagnano <guagnanofrancesco11@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ciccio-90/fg-dynamic-component.git"
+  },
+  "keywords": [
+    "angular",
+    "angular2",
+    "fg",
+    "dynamic",
+    "component",
+    "input",
+    "output",
+    "life-cycle"
+  ],
   "peerDependencies": {
     "@angular/common": "17.2.4",
     "@angular/core": "17.2.4"
