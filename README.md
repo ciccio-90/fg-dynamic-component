@@ -53,13 +53,13 @@ class MyComponent {
         type: "MyDynamicComponent1",
         items: [
             {
-                type: MyDynamicComponent2,
+                type: MyDynamicComponent2
             },
             {
-                type: import("...").then((m) => m.MyDynamicComponent3),
+                type: import("...").then((m) => m.MyDynamicComponent3)
             },
             {
-                type: "MyDynamicComponent4",
+                type: "MyDynamicComponent4"
             }
         ]
     } as FGDynamicItem);
@@ -90,13 +90,13 @@ class MyComponent {
         type: "MyDynamicComponent1",
         items: [
             {
-                type: MyDynamicComponent2,
+                type: MyDynamicComponent2
             },
             {
-                type: import("...").then((m) => m.MyDynamicComponent3),
+                type: import("...").then((m) => m.MyDynamicComponent3)
             },
             {
-                type: "MyDynamicComponent4",
+                type: "MyDynamicComponent4"
             }
         ]
     } as FGDynamicItem);
@@ -121,7 +121,7 @@ class MyComponent {
         type: MyDynamicComponent1,
         inputs: {
             hello: "world",
-            something: () => "can be really complex",
+            something: () => "can be really complex"
         },
         outputs: {
             onSomething: (type) => alert(type)
@@ -131,7 +131,7 @@ class MyComponent {
 
 @Component({
     selector: "my-dynamic-component1",
-    template: "Dynamic Component 1",
+    template: "Dynamic Component 1"
 })
 class MyDynamicComponent1 {
     @Input()
@@ -149,7 +149,7 @@ You can update your inputs passing expressions binding using a view model and th
 ```ts
 @Component({
   selector: 'my-component',
-  template: `<fg-dynamic [configuration]="configuration()" [(viewModel)]="viewModel" />`.
+  template: `<fg-dynamic [configuration]="configuration()" [(viewModel)]="viewModel" />`,
   imports: [FGDynamicComponent],
   standalone: true
 })
@@ -157,7 +157,7 @@ class MyComponent {
   configuration = signal({
     type: MyDynamicComponent1,
     inputs: {
-        hello: '$vm().count % 2 === 0 ? $vm().message : \'Hello World!\'',
+        hello: '$vm().count % 2 === 0 ? $vm().message : \'Hello World!\''
     },
     outputs: {
         onSomething: '$vm.update(viewModel => { ...viewModel, message: $event, count: viewModel.count + 1 })'
@@ -230,7 +230,7 @@ class MyComponent {
             name: "data.firstName",
             disabled: "$vm().metadata.firstName.disabled",
             maxlength: 20,
-            required: true,
+            required: true
         }
     } as FGDynamicItem);
     viewModel = model({ data: { firstName: "Jhon" }, metadata: { firstName: { disabled: false } } });
