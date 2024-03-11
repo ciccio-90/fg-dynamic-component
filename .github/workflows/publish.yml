@@ -16,6 +16,6 @@ jobs:
       - name: Install dependencies and build 🔧
         run: npm ci && npm run build
       - name: Publish package on NPM 📦
-        run: npm publish dist --access=public
+        run: npm login && publish dist/fg-dynamic-component --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
