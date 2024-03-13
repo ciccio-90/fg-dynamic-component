@@ -7,8 +7,8 @@
 
 | Angular | ng-dynamic-component | NPM package                   |
 | ------- | -------------------- | ----------------------------- |
-| 17.2.x  | 1.x.x                | `fg-dynamic-component@^1.0.2` |
-| 17.2.x  | 1.x.x                | `fg-dynamic-component@^1.0.1` |
+| 17.2.4  | 1.0.2                | `fg-dynamic-component@^1.0.2` |
+| 17.2.4  | 1.0.1                | `fg-dynamic-component@^1.0.1` |
 
 </details>
 
