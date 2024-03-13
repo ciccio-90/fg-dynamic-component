@@ -69,15 +69,15 @@ export class FGDynamicComponent implements OnChanges, OnDestroy {
      * and before the view and content children are checked.
      */
     async ngOnChanges(): Promise<void> {
-        // A method to lazy-load a component.
+        // Lazy-load a component.
         await this.loadComponentAsync();
         // Instantiates a single component and inserts its host view into this container.
         this.createComponent();
-        // Instantiates a single component and inserts its host view into this container.
+        // Updates specified input names to new values.
         this.setInputs();
         // Disables/enables the control.
         this.setFormControlStatus();
-        // Add a synchronous validators to this control.
+        // Add synchronous validators to this control.
         this.setFormControlValidators();
         // Set attribute values for an element in the DOM.
         this.setAttributes();
@@ -117,7 +117,7 @@ export class FGDynamicComponent implements OnChanges, OnDestroy {
                 });
             }
 
-            // Creates a new injector instance that provides one or more dependencies, according to a given type or types of StaticProvider.
+            // Instantiates a single component and inserts its host view into this container.
             this._componentRef = this._viewContainerRef().createComponent(this._component, {
                 projectableNodes: this._dynamicItems()?.length > 0 ? [this._dynamicItems().map((e: ElementRef<unknown>): Node => e.nativeElement as Node)] : undefined,
                 injector: injector
@@ -130,7 +130,7 @@ export class FGDynamicComponent implements OnChanges, OnDestroy {
                 this._componentRef.changeDetectorRef.markForCheck();
             }
 
-            // A method to remove the fg-dynamic tag.
+            // Remove the fg-dynamic tag.
             this.removeHostElement();
             // Register handlers for those events by subscribing to an instance.
             this.handleOutputs();
@@ -187,7 +187,7 @@ export class FGDynamicComponent implements OnChanges, OnDestroy {
             const name = this.evaluateExpression(this.configuration().attributes['name'], this.viewModel) as string;
 
             if (typeof(name) === 'string') {
-                // Construct a FormControl with no initial value or validators.
+                // Construct a FormControl with an initial value.
                 this._formControl = new FormControl(this.getModelPropertyValue(this.viewModel(), name, null));
 
                 // Add a control to this group. In a strongly-typed group, the control must be in the group's type (possibly as an optional key).
@@ -243,7 +243,7 @@ export class FGDynamicComponent implements OnChanges, OnDestroy {
     }
 
     /**
-     * Add a synchronous validators to this control.
+     * Add synchronous validators to this control.
      */
     private setFormControlValidators(): void {
         if (this._formControl && this.configuration()?.attributes && Object.keys(this.configuration().attributes).length > 0 && this._componentRef?.location?.nativeElement) {
