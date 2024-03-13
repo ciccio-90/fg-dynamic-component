@@ -204,11 +204,11 @@ class MyComponent {
 
 ### Reactive Forms
 
-You can declaratively set attributes to activate model binding with your ControlValueAccessor components.
+You can declaratively set attributes to activate model binding, form control status (enabled/disabled) and validations with your ControlValueAccessor components.
 
 > **Attributes**:
 >
->-   name: used to attach the new control to the input form group (must match the view model property).
+>-   name: used to attach the new control to the input form group (must match the view model property name).
 >-   disabled: specifies that an input field should be disabled.
 >-   maxlength: specifies the maximum number of characters allowed in an input field.
 >-   minlength: specifies the minimum number of characters allowed in an input field.
