@@ -5,7 +5,7 @@
 <details>
   <summary>Compatibility with Angular</summary>
 
-| Angular | ng-dynamic-component | NPM package                   |
+| Angular | fg-dynamic-component | NPM package                   |
 | ------- | -------------------- | ----------------------------- |
 | 17.2.4  | 1.0.2                | `fg-dynamic-component@^1.0.2` |
 | 17.2.4  | 1.0.1                | `fg-dynamic-component@^1.0.1` |
