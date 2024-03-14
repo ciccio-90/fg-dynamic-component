@@ -3,7 +3,7 @@ import { ControlValueAccessor, FormControl, FormControlDirective, FormGroup, NG_
 import { Subscription } from 'rxjs';
 
 export interface FGDynamicItem {
-    type?: string | Type<unknown> | Promise<Type<unknown>>;
+    type?: string | Type<unknown> | Promise<Type<unknown>> | (() => Promise<Type<unknown>>);
     inputs?: Record<string, string | unknown>;
     outputs?: Record<string, string | Function>;
     attributes?: Record<string, string | unknown>;
@@ -14,15 +14,15 @@ export interface FGDynamicItem {
  * Declare components to dynamically load in static and/or dynamic way using the FGDynamicService.
  */
 export class FGDynamicService {
-    private static _components: Record<string, Type<unknown> | Promise<Type<unknown>>> = {};
+    private static _components: Record<string, Type<unknown> | Promise<Type<unknown>> | (() => Promise<Type<unknown>>)> = {};
 
-    static registerComponent(name: string, type: Type<unknown> | Promise<Type<unknown>>): void {
+    static registerComponent(name: string, type: Type<unknown> | Promise<Type<unknown>> | (() => Promise<Type<unknown>>)): void {
         if (name && type) {
             FGDynamicService._components[name] = type;
         }
     }
 
-    static getComponent(name: string): Type<unknown> | Promise<Type<unknown>> {
+    static getComponent(name: string): Type<unknown> | Promise<Type<unknown>> | (() => Promise<Type<unknown>>) {
         return FGDynamicService._components[name];
     }
 }
@@ -73,6 +73,8 @@ export class FGDynamicComponent implements OnChanges, OnDestroy {
         await this.loadComponentAsync();
         // Instantiates a single component and inserts its host view into this container.
         this.createComponent();
+        // Remove the fg-dynamic tag.
+        this.removeHostElement();
         // Updates specified input names to new values.
         this.setInputs();
         // Disables/enables the control.
@@ -88,10 +90,24 @@ export class FGDynamicComponent implements OnChanges, OnDestroy {
      */
     private async loadComponentAsync(): Promise<void> {
         if (this.configuration().type != null && !this._component) {
+            let type: Type<unknown> | Promise<Type<unknown>> | (() => Promise<Type<unknown>>);
+
             if (typeof(this.configuration().type) === 'string') {
-                this._component = await FGDynamicService.getComponent(this.configuration().type as string);
+                type = FGDynamicService.getComponent(this.configuration().type as string);
             } else {
-                this._component = await (this.configuration().type as (Type<unknown> | Promise<Type<unknown>>));
+                type = this.configuration().type as Type<unknown> | Promise<Type<unknown>> | (() => Promise<Type<unknown>>);
+            }
+
+            try {
+                type = (type as () => Promise<Type<unknown>>)();
+            } catch {
+                type = type;
+            } finally {
+                if (type instanceof Promise) {
+                    this._component = await type;
+                } else {
+                    this._component = type as Type<unknown>;
+                }
             }
         }
     }
@@ -130,8 +146,6 @@ export class FGDynamicComponent implements OnChanges, OnDestroy {
                 this._componentRef.changeDetectorRef.markForCheck();
             }
 
-            // Remove the fg-dynamic tag.
-            this.removeHostElement();
             // Register handlers for those events by subscribing to an instance.
             this.handleOutputs();
             // Construct a FormControl with an initial value.

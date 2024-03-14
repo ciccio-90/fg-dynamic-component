@@ -7,6 +7,7 @@
 
 | Angular | fg-dynamic-component | NPM package                   |
 | ------- | -------------------- | ----------------------------- |
+| 17.2.4  | 1.1.0                | `fg-dynamic-component@^1.1.0` |
 | 17.2.4  | 1.0.2                | `fg-dynamic-component@^1.0.2` |
 | 17.2.4  | 1.0.1                | `fg-dynamic-component@^1.0.1` |
 
@@ -40,10 +41,8 @@ and bind from your component class type of component to render:
 import { FGDynamicService, FGDynamicItem } from "fg-dynamic-component";
 
 FGDynamicService.registerComponent("MyDynamicComponent1", MyDynamicComponent1);
-FGDynamicService.registerComponent(
-    "MyDynamicComponent4",
-    import("...").then((m) => m.MyDynamicComponent4)
-);
+FGDynamicService.registerComponent("MyDynamicComponent4", import("...").then(m => m.MyDynamicComponent4));
+FGDynamicService.registerComponent("MyDynamicComponent5", async () => (await import("...")).MyDynamicComponent5);
 
 @Component({
     selector: "my-component",
@@ -57,10 +56,19 @@ class MyComponent {
                 type: MyDynamicComponent2
             },
             {
-                type: import("...").then((m) => m.MyDynamicComponent3)
+                type: import("...").then(m => m.MyDynamicComponent3)
             },
             {
                 type: "MyDynamicComponent4"
+            },
+            {
+                type: "MyDynamicComponent5"
+            },
+            {
+                type: async () => (await import("...")).MyDynamicComponent6
+            },
+            {
+                type: () => import("...").then(m => m.MyDynamicComponent7)
             }
         ]
     } as FGDynamicItem);
@@ -74,11 +82,8 @@ You may use `<fg-dynamic>` as a standalone component:
 ```ts
 import { FGDynamicComponent, FGDynamicService, FGDynamicItem } from "fg-dynamic-component";
 
-FGDynamicService.registerComponent("MyDynamicComponent1", MyDynamicComponent1);
-FGDynamicService.registerComponent(
-    "MyDynamicComponent4",
-    import("...").then((m) => m.MyDynamicComponent4)
-);
+FGDynamicService.registerComponent("MyDynamicComponent4", import("...").then(m => m.MyDynamicComponent4));
+FGDynamicService.registerComponent("MyDynamicComponent5", async () => (await import("...")).MyDynamicComponent5);
 
 @Component({
     selector: "my-component",
@@ -88,16 +93,24 @@ FGDynamicService.registerComponent(
 })
 class MyComponent {
     configuration = signal({
-        type: "MyDynamicComponent1",
         items: [
             {
                 type: MyDynamicComponent2
             },
             {
-                type: import("...").then((m) => m.MyDynamicComponent3)
+                type: import("...").then(m => m.MyDynamicComponent3)
             },
             {
                 type: "MyDynamicComponent4"
+            },
+            {
+                type: "MyDynamicComponent5"
+            },
+            {
+                type: async () => (await import("...")).MyDynamicComponent6
+            },
+            {
+                type: () => import("...").then(m => m.MyDynamicComponent7)
             }
         ]
     } as FGDynamicItem);
