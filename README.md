@@ -1,6 +1,6 @@
 # fg-dynamic-component
 
-> Create a standalone signals based dynamic components tree through a JSON configuration with full life-cycle support for inputs, outputs, attributes, reactive forms and expressions binding evaluation.
+Create an Angular standalone signals based dynamic components tree through a JSON configuration with full life-cycle support for inputs, outputs, attributes, reactive forms and expressions binding evaluation.
 
 <details>
   <summary>Compatibility with Angular</summary>
