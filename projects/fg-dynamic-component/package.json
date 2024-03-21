@@ -1,6 +1,6 @@
 {
   "name": "fg-dynamic-component",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": "Francesco Guagnano <guagnanofrancesco11@gmail.com>",
   "license": "MIT",
   "repository": {
@@ -10,7 +10,7 @@
   "keywords": [
     "angular",
     "angular2",
-    "fg",
+    "ng",
     "dynamic",
     "component",
     "input",
